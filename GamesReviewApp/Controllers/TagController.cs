@@ -59,5 +59,37 @@ namespace GamesReviewApp.Controllers
 
             return Ok(games);
         }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateTag([FromBody] TagDto tagCreate)
+        {
+            if (tagCreate == null)
+                return BadRequest(ModelState);
+
+            var tag = _tagRepository.GetTags()
+                .Where(t => t.Name.Trim().ToUpper() == tagCreate.Name.TrimEnd().ToUpper())
+                .FirstOrDefault();
+
+            if(tag != null)
+            {
+                ModelState.AddModelError("", "Tag already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var tagMap = _mapper.Map<Tag>(tagCreate);
+
+            if(!_tagRepository.CreateTag(tagMap))
+            {
+                ModelState.AddModelError("", "Something went wrong while saving");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Successfully created");
+        }
     }
 }

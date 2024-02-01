@@ -12,11 +12,13 @@ namespace GamesReviewApp.Controllers
     {
         private readonly IProducentRepository _producentRepository;
         private readonly IMapper _mapper;
+        private readonly ICountryRepository _countryRepository;
 
-        public ProducentController(IProducentRepository producentRepository, IMapper mapper)
+        public ProducentController(IProducentRepository producentRepository, ICountryRepository countryRepository, IMapper mapper)
         {
             _producentRepository = producentRepository;
             _mapper = mapper;
+            _countryRepository = countryRepository;
         }
 
         [HttpGet]
@@ -61,6 +63,40 @@ namespace GamesReviewApp.Controllers
                 return BadRequest(ModelState);
 
             return Ok(producent);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateProducent([FromQuery] int countryId, [FromBody] ProducentDto producentCreate)
+        {
+            if (producentCreate == null)
+                return BadRequest(ModelState);
+
+            var producent = _producentRepository.GetProducers()
+                .Where(p => p.Name.Trim().ToUpper() == producentCreate.Name.TrimEnd().ToUpper())
+                .FirstOrDefault();
+
+            if(producent != null)
+            {
+                ModelState.AddModelError("", "Producent already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var producentMap = _mapper.Map<Producent>(producentCreate);
+
+            producentMap.Country = _countryRepository.GetCountry(countryId);
+
+            if(!_producentRepository.CreateProducent(producentMap))
+            {
+                ModelState.AddModelError("", "Something went wrong while saving");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Successfully created");
         }
     }
 }

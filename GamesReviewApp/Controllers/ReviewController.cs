@@ -12,11 +12,18 @@ namespace GamesReviewApp.Controllers
     {
         private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
+        private readonly IGameRepository _gameRepository;
+        private readonly IReviewerRepository _reviewerRepository;
 
-        public ReviewController(IReviewRepository reviewRepository, IMapper mapper)
+        public ReviewController(IReviewRepository reviewRepository, 
+            IMapper mapper,
+            IGameRepository gameRepository,
+            IReviewerRepository reviewerRepository)
         {
             _reviewRepository = reviewRepository;
             _mapper = mapper;
+            _gameRepository = gameRepository;
+            _reviewerRepository = reviewerRepository;
         }
 
         [HttpGet]
@@ -57,6 +64,31 @@ namespace GamesReviewApp.Controllers
                 return BadRequest();
 
             return Ok(reviews);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateReview([FromQuery] int reviewerId, [FromQuery] int gameId,[FromBody] ReviewDto reviewCreate)
+        {
+            if (reviewCreate == null)
+                return BadRequest(ModelState);
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var reviewMap = _mapper.Map<Review>(reviewCreate);
+
+            reviewMap.Game = _gameRepository.GetGame(gameId);
+            reviewMap.Reviewer = _reviewerRepository.GetReviewer(reviewerId);
+
+            if(!_reviewRepository.CreateReview(reviewMap))
+            {
+                ModelState.AddModelError("", "Something went wrong while saving");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Successfully created");
         }
     }
 }

@@ -8,5 +8,7 @@ namespace GamesReviewApp.Interfaces
         Tag GetTag(int id);
         ICollection<Game> GetGameByTag(int tagId);
         bool TagExists(int id);
+        bool CreateTag(Tag tag);
+        bool Save();
     }
 }

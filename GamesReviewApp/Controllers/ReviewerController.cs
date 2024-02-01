@@ -55,12 +55,38 @@ namespace GamesReviewApp.Controllers
             if (!_reviewerRepository.ReviewerExists(reviewerId))
                 return NotFound();
 
-            var reviews = _mapper.Map<List<ReviewerDto>>(_reviewerRepository.GetReviewsByRewiever(reviewerId));
+            var reviews = _mapper.Map<List<ReviewDto>>(_reviewerRepository.GetReviewsByRewiever(reviewerId));
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             return Ok(reviews);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateReviewer([FromBody] ReviewerDto reviewerCreate)
+        {
+            if (reviewerCreate == null)
+                return BadRequest(ModelState);
+
+            var reviewers = _reviewerRepository.GetReviewers()
+                .Where(r => r.Name.Trim().ToUpper() == reviewerCreate.Name.TrimEnd().ToUpper())
+                .FirstOrDefault();
+
+            if(reviewers != null)
+            {
+                ModelState.AddModelError("", "Tag already exists");
+                return StatusCode(400, ModelState);
+            }
+
+            var reviewerMap = _mapper.Map<Reviewer>(reviewerCreate);
+
+            if(!_reviewerRepository.CreateReviewer(reviewerMap))
+                return BadRequest(ModelState);
+
+            return Ok("Successfully created");
         }
     }
 }

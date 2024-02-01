@@ -65,5 +65,37 @@ namespace GamesReviewApp.Controllers
 
             return Ok(rate);
         }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateGame([FromQuery] int producentId, [FromQuery] int tagId ,[FromBody] GameDto gameCreate)
+        {
+            if (gameCreate == null)
+                return BadRequest(ModelState);
+
+            var games = _gameRepository.GetGames()
+                .Where(g => g.Name.Trim().ToUpper() == gameCreate.Name.TrimEnd().ToUpper())
+                .FirstOrDefault();
+
+            if(games != null)
+            {
+                ModelState.AddModelError("", "Game already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var gameMap = _mapper.Map<Game>(gameCreate);
+
+            if (!_gameRepository.CreateGame(producentId,tagId,gameMap))
+            {
+                ModelState.AddModelError("", "Something went wrong while saving");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Successfully created");
+        }
     }
 }

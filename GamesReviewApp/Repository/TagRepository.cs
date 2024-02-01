@@ -31,5 +31,18 @@ namespace GamesReviewApp.Repository
         {
             return _context.Tags.Any(t => t.Id == id);
         }
+
+        public bool CreateTag(Tag tag)
+        {
+            _context.Add(tag);
+
+            return Save();
+        }
+
+        public bool Save()
+        {
+            var saved = _context.SaveChanges();
+            return saved > 0 ? true : false;
+        }
     }
 }

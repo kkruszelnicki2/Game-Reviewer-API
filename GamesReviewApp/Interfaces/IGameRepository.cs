@@ -9,5 +9,7 @@ namespace GamesReviewApp.Interfaces
         Game GetGame(string name);
         decimal GetGameRating(int gameId);
         bool GameExists(int gameId);
+        bool CreateGame(int producentId, int tagId, Game game);
+        bool Save();
     }
 }
