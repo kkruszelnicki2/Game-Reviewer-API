@@ -13,11 +13,18 @@ namespace GamesReviewApp.Controllers
     {
         private readonly IGameRepository _gameRepository;
         private readonly IMapper _mapper;
+        private readonly IProducentRepository _producentRepository;
+        private readonly ITagRepository _tagRepository;
 
-        public GameController(IGameRepository gameRepository, IMapper mapper)
+        public GameController(IGameRepository gameRepository, 
+            IMapper mapper,
+            IProducentRepository producentRepository,
+            ITagRepository tagRepository)
         {
             _gameRepository = gameRepository;
             _mapper = mapper;
+            _producentRepository = producentRepository;
+            _tagRepository = tagRepository;
         }
 
         [HttpGet]
@@ -96,6 +103,36 @@ namespace GamesReviewApp.Controllers
             }
 
             return Ok("Successfully created");
+        }
+
+        [HttpPut("{gameId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult UpdateGame(int gameId, [FromQuery] int producentId, 
+            [FromQuery] int tagId,[FromBody] GameDto gameUpdate)
+        {
+            if (gameUpdate == null)
+                return BadRequest(ModelState);
+
+            if (gameId != gameUpdate.Id)
+                return BadRequest(ModelState);
+
+            if (!_gameRepository.GameExists(gameId))
+                return NotFound();
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var gameMap = _mapper.Map<Game>(gameUpdate);
+
+            if(!_gameRepository.UpdateGame(producentId, tagId, gameMap))
+            {
+                ModelState.AddModelError("", "Something went wrong while saving");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Successfully updated");
         }
     }
 }

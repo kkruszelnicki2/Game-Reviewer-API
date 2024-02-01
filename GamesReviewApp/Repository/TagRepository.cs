@@ -44,5 +44,11 @@ namespace GamesReviewApp.Repository
             var saved = _context.SaveChanges();
             return saved > 0 ? true : false;
         }
+
+        public bool UpdateTag(Tag tag)
+        {
+            _context.Update(tag);
+            return Save();
+        }
     }
 }

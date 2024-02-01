@@ -98,5 +98,34 @@ namespace GamesReviewApp.Controllers
 
             return Ok("Successfully created");
         }
+
+        [HttpPut("{producentId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult UpdateProducent(int producentId, [FromBody] ProducentDto producentUpdate)
+        {
+            if (producentUpdate == null)
+                return BadRequest(ModelState);
+
+            if (producentId != producentUpdate.Id)
+                return BadRequest(ModelState);
+
+            if (!_producentRepository.ProducentExists(producentId))
+                return NotFound();
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var producentMap = _mapper.Map<Producent>(producentUpdate);
+
+            if (!_producentRepository.UpdateProducent(producentMap))
+            {
+                ModelState.AddModelError("", "Something went wrong while updating");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Successfully updated");
+        }
     }
 }

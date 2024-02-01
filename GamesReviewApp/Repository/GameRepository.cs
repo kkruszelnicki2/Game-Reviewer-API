@@ -74,5 +74,11 @@ namespace GamesReviewApp.Repository
             var saved = _context.SaveChanges();
             return saved > 0;
         }
+
+        public bool UpdateGame(int producentId, int tagId, Game game)
+        {
+            _context.Update(game);
+            return Save();
+        }
     }
 }

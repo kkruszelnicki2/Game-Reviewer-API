@@ -9,6 +9,7 @@ namespace GamesReviewApp.Interfaces
         ICollection<Game> GetGameByTag(int tagId);
         bool TagExists(int id);
         bool CreateTag(Tag tag);
+        bool UpdateTag(Tag tag);
         bool Save();
     }
 }

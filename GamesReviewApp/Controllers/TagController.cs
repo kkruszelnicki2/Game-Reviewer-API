@@ -91,5 +91,34 @@ namespace GamesReviewApp.Controllers
 
             return Ok("Successfully created");
         }
+
+        [HttpPut("{tagId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult UpdateTag(int tagId, [FromBody] TagDto updateTag)
+        {
+            if (updateTag == null)
+                return BadRequest(ModelState);
+
+            if (tagId != updateTag.Id)
+                return BadRequest(ModelState);
+
+            if (!_tagRepository.TagExists(tagId))
+                return NotFound();
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var tagMap = _mapper.Map<Tag>(updateTag);
+
+            if(!_tagRepository.UpdateTag(tagMap))
+            {
+                ModelState.AddModelError("", "Something went wrong while saving");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Successfully updated");
+        }
     }
 }
