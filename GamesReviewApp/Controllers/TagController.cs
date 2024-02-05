@@ -120,5 +120,28 @@ namespace GamesReviewApp.Controllers
 
             return Ok("Successfully updated");
         }
+
+        [HttpDelete("{tagId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult DeleteTag(int tagId)
+        {
+            if (!_tagRepository.TagExists(tagId))
+                return NotFound();
+
+            var tagToDelete = _tagRepository.GetTag(tagId);
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if(!_tagRepository.DeleteTag(tagToDelete))
+            {
+                ModelState.AddModelError("", "Something went wrong while deleting");
+                return StatusCode(500);
+            }
+
+            return Ok("Successfully deleted");
+        }
     }
 }

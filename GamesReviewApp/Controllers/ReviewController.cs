@@ -2,6 +2,7 @@
 using GamesReviewApp.Dto;
 using GamesReviewApp.Interfaces;
 using GamesReviewApp.Models;
+using GamesReviewApp.Repository;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GamesReviewApp.Controllers
@@ -118,6 +119,29 @@ namespace GamesReviewApp.Controllers
             }
 
             return Ok("Successfully updated");
+        }
+
+        [HttpDelete("{reviewId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult DeleteReview(int reviewId)
+        {
+            if (!_reviewRepository.ReviewExists(reviewId))
+                return NotFound();
+
+            var reviewToDelete = _reviewRepository.GetReview(reviewId);
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!_reviewRepository.DeleteReview(reviewToDelete))
+            {
+                ModelState.AddModelError("", "Something went wrong while deleting");
+                return StatusCode(500);
+            }
+
+            return Ok("Successfully deleted");
         }
     }
 }

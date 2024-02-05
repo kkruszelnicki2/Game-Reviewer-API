@@ -2,6 +2,7 @@
 using GamesReviewApp.Dto;
 using GamesReviewApp.Interfaces;
 using GamesReviewApp.Models;
+using GamesReviewApp.Repository;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GamesReviewApp.Controllers
@@ -120,6 +121,29 @@ namespace GamesReviewApp.Controllers
             }
 
             return Ok("Successfully updated");
+        }
+
+        [HttpDelete("{countryId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult DeleteCountry(int countryId)
+        {
+            if (!_countryRepository.CountryExists(countryId))
+                return NotFound();
+
+            var tagToDelete = _countryRepository.GetCountry(countryId);
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!_countryRepository.DeleteCountry(tagToDelete))
+            {
+                ModelState.AddModelError("", "Something went wrong while deleting");
+                return StatusCode(500);
+            }
+
+            return Ok("Successfully deleted");
         }
     }
 }

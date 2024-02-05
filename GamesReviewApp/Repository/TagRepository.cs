@@ -50,5 +50,11 @@ namespace GamesReviewApp.Repository
             _context.Update(tag);
             return Save();
         }
+
+        public bool DeleteTag(Tag tag)
+        {
+            _context.Remove(tag);
+            return Save();
+        }
     }
 }

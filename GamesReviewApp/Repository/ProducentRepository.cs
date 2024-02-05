@@ -20,6 +20,12 @@ namespace GamesReviewApp.Repository
             return Save();
         }
 
+        public bool DeleteProducent(Producent producent)
+        {
+            _context.Remove(producent);
+            return Save();
+        }
+
         public ICollection<Game> GetGameByProducent(int producentId)
         {
             return _context.GameProducers.Where(p => p.Producent.Id == producentId).Select(g => g.Game).ToList();

@@ -13,18 +13,15 @@ namespace GamesReviewApp.Controllers
     {
         private readonly IGameRepository _gameRepository;
         private readonly IMapper _mapper;
-        private readonly IProducentRepository _producentRepository;
-        private readonly ITagRepository _tagRepository;
+        private readonly IReviewRepository _reviewRepository;
 
         public GameController(IGameRepository gameRepository, 
             IMapper mapper,
-            IProducentRepository producentRepository,
-            ITagRepository tagRepository)
+            IReviewRepository reviewRepository)
         {
             _gameRepository = gameRepository;
             _mapper = mapper;
-            _producentRepository = producentRepository;
-            _tagRepository = tagRepository;
+            _reviewRepository = reviewRepository;
         }
 
         [HttpGet]
@@ -133,6 +130,35 @@ namespace GamesReviewApp.Controllers
             }
 
             return Ok("Successfully updated");
+        }
+
+        [HttpDelete("{gameId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult DeleteGame(int gameId)
+        {
+            if (!_gameRepository.GameExists(gameId))
+                return NotFound();
+
+            var reviewsToDelete = _reviewRepository.GetReviewsOfAGame(gameId);
+            var gameToDelete = _gameRepository.GetGame(gameId);
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if(!_reviewRepository.DeleteReviews(reviewsToDelete.ToList()))
+            {
+                ModelState.AddModelError("", "Something went wrong when deleting reviews");
+            }
+
+            if (!_gameRepository.DeleteGame(gameToDelete))
+            {
+                ModelState.AddModelError("", "Something went wrong while deleting");
+                return StatusCode(500);
+            }
+
+            return Ok("Successfully deleted");
         }
     }
 }

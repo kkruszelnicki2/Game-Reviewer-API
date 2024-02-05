@@ -10,6 +10,7 @@ namespace GamesReviewApp.Interfaces
         bool TagExists(int id);
         bool CreateTag(Tag tag);
         bool UpdateTag(Tag tag);
+        bool DeleteTag(Tag tag);
         bool Save();
     }
 }

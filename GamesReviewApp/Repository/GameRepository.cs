@@ -37,6 +37,12 @@ namespace GamesReviewApp.Repository
             return Save();
         }
 
+        public bool DeleteGame(Game game)
+        {
+            _context.Remove(game);
+            return Save();
+        }
+
         public bool GameExists(int gameId)
         {
             return _context.Games.Any(g => g.Id == gameId);
